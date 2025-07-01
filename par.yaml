@@ -1,0 +1,133 @@
+# participants_api_insomnia.yaml
+_type: export
+__export_format: 4
+__export_date: 2025-06-30T00:00:00.000Z
+resources:
+  # ────────────────────────────────────────────────
+  #  Workspace
+  # ────────────────────────────────────────────────
+  - _id: wrk_participants_api
+    _type: workspace
+    name: Participants API
+    description: REST CRUD for course participants (Node.js + Express + PostgreSQL)
+
+  # ────────────────────────────────────────────────
+  #  Base environment (edit base_url here)
+  # ────────────────────────────────────────────────
+  - _id: env_base
+    _type: environment
+    parentId: wrk_participants_api
+    name: Base Environment
+    data:
+      base_url: http://localhost:3050
+      test_participant_id: ""
+    color: "#3f51b5"
+
+  # ────────────────────────────────────────────────
+  #  Folder: Health
+  # ────────────────────────────────────────────────
+  - _id: fld_health
+    _type: request_group
+    parentId: wrk_participants_api
+    name: Health
+
+  - _id: req_health_check
+    _type: request
+    parentId: fld_health
+    name: GET /api/health
+    method: GET
+    url: "{{ base_url }}/api/health"
+    description: Simple health-check endpoint
+    headers:
+      - name: Accept
+        value: application/json
+
+  # ────────────────────────────────────────────────
+  #  Folder: Participants
+  # ────────────────────────────────────────────────
+  - _id: fld_participants
+    _type: request_group
+    parentId: wrk_participants_api
+    name: Participants
+
+  # List all participants
+  - _id: req_list_participants
+    _type: request
+    parentId: fld_participants
+    name: GET /api/participants
+    method: GET
+    url: "{{ base_url }}/api/participants?page=1&limit=25"
+    headers:
+      - name: Accept
+        value: application/json
+
+  # Create participant
+  - _id: req_create_participant
+    _type: request
+    parentId: fld_participants
+    name: POST /api/participants
+    method: POST
+    url: "{{ base_url }}/api/participants"
+    headers:
+      - name: Content-Type
+        value: application/json
+      - name: Accept
+        value: application/json
+    body:
+      mimeType: application/json
+      text: |
+        {
+          "full_name": "John Doe",
+          "age": 20,
+          "first_semester": 8.5,
+          "second_semester": 7.5
+        }
+    # After sending, use the visual “Set Env” to store the id in test_participant_id
+    tests:
+      - name: Save created id to env
+        code: |
+          const resp = JSON.parse(response.body);
+          if (resp.id) {
+            insomnia.env.set("test_participant_id", resp.id);
+          }
+
+  # Get participant by id
+  - _id: req_get_participant
+    _type: request
+    parentId: fld_participants
+    name: GET /api/participants/:id
+    method: GET
+    url: "{{ base_url }}/api/participants/{{ test_participant_id }}"
+    headers:
+      - name: Accept
+        value: application/json
+
+  # Update participant
+  - _id: req_update_participant
+    _type: request
+    parentId: fld_participants
+    name: PUT /api/participants/:id
+    method: PUT
+    url: "{{ base_url }}/api/participants/{{ test_participant_id }}"
+    headers:
+      - name: Content-Type
+        value: application/json
+      - name: Accept
+        value: application/json
+    body:
+      mimeType: application/json
+      text: |
+        {
+          "first_semester": 9.5
+        }
+
+  # Delete participant
+  - _id: req_delete_participant
+    _type: request
+    parentId: fld_participants
+    name: DELETE /api/participants/:id
+    method: DELETE
+    url: "{{ base_url }}/api/participants/{{ test_participant_id }}"
+    headers:
+      - name: Accept
+        value: application/json
